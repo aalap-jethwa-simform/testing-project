@@ -9,8 +9,8 @@ flask-sqlalchemy = "*"
 pytest = "*"
 pytest-cov = "*"
 requests = "*"
-psycopg2 = "*"
-flask-migrate = "*  "
+psycopg2-binary = "*"
+flask-migrate = "*"
 
 [dev-packages]
 pytest = "*"
