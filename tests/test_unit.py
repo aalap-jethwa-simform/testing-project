@@ -47,37 +47,40 @@ class TestUserModel:
             assert updated_user.name == "Alicia"
             assert updated_user.email == "alicetest@example.com"
 
-    def test_delete_user(self, add_user):
+    def test_delete_user(self, app, add_user):
         """Test deleting a user from the database."""
-        user = add_user(name="Bob1", email="bob1@example.com")
+        with app.app_context():
+            user = add_user(name="Bob1", email="bob1@example.com")
 
-        # Ensure the user exists in the database before deletion
-        user_from_db = db.session.get(User, user.id)
-        assert user_from_db is not None
+            # Ensure the user exists in the database before deletion
+            user_from_db = db.session.get(User, user.id)
+            assert user_from_db is not None
 
-        # Delete the user
-        db.session.delete(user)
-        db.session.commit()
+            # Delete the user
+            db.session.delete(user)
+            db.session.commit()
 
-        # Ensure the user has been deleted
-        deleted_user = db.session.get(User, user.id)
-        assert deleted_user is None
+            # Ensure the user has been deleted
+            deleted_user = db.session.get(User, user.id)
+            assert deleted_user is None
 
-    def test_user_email_uniqueness(self, add_user):
+    def test_user_email_uniqueness(self, app, add_user):
         """Test that the email field is unique."""
-        # Add a user with a specific email
-        add_user(name="Charlie1", email="charlie1@example.com")
+        with app.app_context():
+            # Add a user with a specific email
+            add_user(name="Charlie1", email="charlie1@example.com")
 
-        # Try to add another user with the same email and catch the exception
-        with pytest.raises(IntegrityError):
-            add_user(name="Dan", email="charlie1@example.com")
+            # Try to add another user with the same email and catch the exception
+            with pytest.raises(IntegrityError):
+                add_user(name="Dan", email="charlie1@example.com")
 
-        # Verify that only one user with this email exists
-        users_with_same_email = User.query.filter_by(email="charlie1@example.com").all()
-        assert len(users_with_same_email) == 1
+            # Verify that only one user with this email exists
+            users_with_same_email = User.query.filter_by(email="charlie1@example.com").all()
+            assert len(users_with_same_email) == 1
 
-    def test_user_email_required(self, add_user):
+    def test_user_email_required(self, app, add_user):
         """Test that the email field is required."""
-        with pytest.raises(IntegrityError):
-            add_user(name="No Email", email='')
+        with app.app_context():
+            with pytest.raises(IntegrityError):
+                add_user(name="No Email", email='')
 
