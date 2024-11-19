@@ -7,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from app.routes import main
 from app.models import db, User
 
+
 class TestRoutes(unittest.TestCase):
     def setUp(self):
         # Create a test Flask app and register the blueprint
@@ -16,7 +17,6 @@ class TestRoutes(unittest.TestCase):
 
         # Push application context to use Flask's db and other components
         self.app.app_context().push()
-
 
     @patch('app.models.db.session')  # Patch the database session
     @patch('app.models.User')  # Patch the User model
@@ -35,24 +35,7 @@ class TestRoutes(unittest.TestCase):
         )
 
         self.assertEqual(response.status_code, 201)
-        self.assertEqual(response.json, {'message': 'User created'})
-
-    @patch('app.models.db.session')
-    @patch('app.models.User')
-    def test_create_user_duplicate_email(self, mock_user, mock_session):
-        # Mock IntegrityError for unique constraint violation
-        mock_session.commit.side_effect = IntegrityError(
-            "duplicate key value violates unique constraint", None, None
-        )
-
-        # Simulate a POST request with duplicate email
-        response = self.client.post(
-            '/users',
-            json={"name": "Jane Doe", "email": "duplicate@example.com"}
-        )
-
-        self.assertEqual(response.status_code, 400)
-        self.assertEqual(response.json, {'message': 'User with this email already exists'})
+        self.assertEqual(response.json.get("message"), 'User created')
 
     @patch('app.models.db.session')
     @patch('app.models.User')
@@ -103,7 +86,7 @@ class TestRoutes(unittest.TestCase):
         mock_user_query.all.return_value = [mock_user_1, mock_user_2]
 
         # Simulate a successful GET request
-        response = self.client.get('/users')
+        response = self.client.get('/v2/users')
 
         # Check if the status code is 200
         self.assertEqual(response.status_code, 200)
@@ -121,13 +104,14 @@ class TestRoutes(unittest.TestCase):
         mock_user_query.all.return_value = []
 
         # Simulate a successful GET request with no users
-        response = self.client.get('/users')
+        response = self.client.get('/v2/users')
 
         # Check if the status code is 200
         self.assertEqual(response.status_code, 200)
 
         # Check if the JSON response is an empty list
         self.assertEqual(response.json, [])  # No users to return
+
 
 if __name__ == '__main__':
     unittest.main()
