@@ -1,5 +1,6 @@
 import pytest
 from app import create_app, db
+from app.models import User
 
 
 @pytest.fixture(scope="session")
@@ -24,39 +25,20 @@ def client(app):
     return app.test_client()
 
 
-@pytest.fixture
-def add_user():
+@pytest.fixture(scope="function")
+def add_user(app):
     """Helper function to add a user to the database."""
-
-    def _add_user(name, email):
-        from app.models import User
-        user = User(name=name, email=email)
-        db.session.add(user)
-        try:
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
-            raise  # Re-raise the exception for the test to fail
-        return user
-
-    return _add_user
-
-
-@pytest.fixture
-def add_project():
-    """Helper function to add a project to the database."""
-
-    def _add_project(name, description, user_id):
-        from app.models import Project
-        project = Project(name=name,
-                          description=description,
-                          user_id=user_id)
-        db.session.add(project)
-        try:
-            db.session.commit()
-        except Exception:
-            db.session.rollback()
-            raise  # Re-raise the exception for the test to fail
-        return project
-
-    return _add_project
+    with app.app_context():  # Ensure the app context is used for DB operations
+        def _add_user(name, email):
+            user = User(name=name, email=email)
+            db.session.add(user)
+            try:
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+                raise  # Re-raise the exception for the test to fail
+            return user
+        
+        # Ensure that we cleanup the session after each test
+        yield _add_user
+        db.session.remove()
