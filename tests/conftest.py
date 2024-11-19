@@ -32,6 +32,10 @@ def add_user():
         from app.models import User
         user = User(name=name, email=email)
         db.session.add(user)
-        db.session.commit()
+        try:
+            db.session.commit()
+        except Exception:
+            db.session.rollback()
+            raise  # Re-raise the exception for the test to fail
         return user
     return _add_user
