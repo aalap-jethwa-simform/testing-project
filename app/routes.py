@@ -32,3 +32,14 @@ def create_user():
 def get_users():
     users = User.query.all()
     return jsonify([{'id': user.id, 'name': user.name, 'email': user.email} for user in users])
+
+
+@main.route('v2/users', methods=['GET'])
+def get_users():
+    try:
+        users = User.query.all()
+        user_list = [{'id': user.id, 'name': user.name, 'email': user.email} for user in users]
+        return jsonify(user_list), 200
+    except Exception:
+        # Catch any exception and return a 500 error
+        return jsonify({'error': 'Internal Server Error'}), 500
