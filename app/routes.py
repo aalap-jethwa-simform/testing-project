@@ -34,7 +34,7 @@ def create_user():
         db.session.add(user)
         db.session.commit()
 
-        return jsonify({'message': 'User created'}), 201
+        return jsonify({"id": user.id, "message": 'User created'}), 201
     except IntegrityError as e:
         db.session.rollback()  # Rollback the transaction to avoid lingering locks
         if "UNIQUE constraint failed" in str(e):
@@ -52,6 +52,37 @@ def get_users():
     return jsonify([{'id': user.id, 'name': user.name, 'email': user.email} for user in users])
 
 
+@main.route('/users/<int:user_id>', methods=['PUT'])
+def update_user(user_id):
+    try:
+        user = User.query.get(user_id)
+    except Exception as _:
+        return jsonify({'message': USER_NOT_FOUND}), 404
+
+    updated_data = request.json
+    user.name = updated_data.get("name", user.name)
+
+    try:
+        db.session.commit()
+        return jsonify({"message": "User updated"}), 200
+    except Exception as e:
+        db.session.rollback()
+        print(f"Error updating user: {e}")
+        return jsonify({'message': 'Error updating user'}), 500
+
+
+@main.route('/users/<int:user_id>', methods=['DELETE'])
+def delete_user(user_id):
+    try:
+        user = User.query.get(user_id)
+    except Exception as _:
+        return jsonify({'message': 'User not found'}), 404
+
+    db.session.delete(user)
+    db.session.commit()
+    return jsonify({"message": "User deleted"}), 200
+
+
 @main.route('/projects', methods=['POST'])
 def create_project():
     try:
@@ -60,7 +91,7 @@ def create_project():
         user = User.query.get(user_id)
 
         if not user:
-            return jsonify({'error': USER_NOT_FOUND}), 403  # Unauthorized user
+            return jsonify({'error': USER_NOT_FOUND}), 404  # Unauthorized user
 
         project = Project(name=data['name'], description=data['description'], user_id=user_id)
         db.session.add(project)
@@ -98,9 +129,11 @@ def get_projects_by_user(user_id):
 @main.route('/projects/<int:project_id>', methods=['DELETE'])
 def delete_project(project_id):
     """Delete a project by ID."""
-    project = find_project_by_id(project_id)
-    if not project:
-        return jsonify({'error': 'Project not found'}), 404
+    try:
+        project = Project.query.get(project_id)
+    except Exception as _:
+        return jsonify({'message': 'Project not found'}), 404
 
-    projects.remove(project)
+    db.session.delete(project)
+    db.session.commit()
     return jsonify({'message': 'Project deleted'}), 200
