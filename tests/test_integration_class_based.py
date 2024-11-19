@@ -51,7 +51,7 @@ class TestUserIntegrationTest:
 
     def test_get_users_empty(self):
         """Test retrieving users when there are none."""
-        response = self.client.get('/users')
+        response = self.client.get('/users/list')
         assert response.status_code == 200
         assert response.json == []
 
@@ -63,7 +63,7 @@ class TestUserIntegrationTest:
         ]
         for user in user_data:
             self.client.post('/users', json=user)
-        response = self.client.get('/users')
+        response = self.client.get('/users/list')
         assert response.status_code == 200
         assert len(response.json) == 2
         assert response.json[0]['name'] == "Alice"

@@ -46,8 +46,8 @@ def create_user():
         return jsonify({'error': INTERNAL_SERVER_ERROR}), 500
 
 
-@main.route('/users', methods=['GET'])
-def get_users():
+@main.route('/users/list', methods=['GET'])
+def get_users_list():
     users = User.query.all()
     return jsonify([{'id': user.id, 'name': user.name, 'email': user.email} for user in users])
 
@@ -139,7 +139,7 @@ def delete_project(project_id):
     return jsonify({'message': 'Project deleted'}), 200
 
 
-@main.route('v2/users', methods=['GET'])
+@main.route('/v2/users', methods=['GET'])
 def get_users():
     try:
         users = User.query.all()
