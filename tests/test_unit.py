@@ -7,40 +7,45 @@ import re
 
 class TestUserModel:
 
-    def test_create_user(self, add_user):
+    def test_create_user(self, app, add_user):
         """Test creating a user and saving to the database."""
-        user = add_user(name="John Doe", email="john@example.com")
+        with app.app_context():
+            """Test creating a user and saving to the database."""
+            user = add_user(name="John Doe", email="john@example.com")
 
-        assert user.name == "John Doe"
-        assert user.email == "john@example.com"
-        assert user.id is not None
+            assert user.name == "John Doe"
+            assert user.email == "john@example.com"
+            assert user.id is not None
 
-        user_from_db = db.session.get(User, user.id)
-        assert user_from_db is not None
-        assert user_from_db.name == "John Doe"
-        assert user_from_db.email == "john@example.com"
+            user_from_db = db.session.get(User, user.id)
+            assert user_from_db is not None
+            assert user_from_db.name == "John Doe"
+            assert user_from_db.email == "john@example.com"
 
-    def test_read_user(self, add_user):
+    def test_read_user(self, app, add_user):
         """Test retrieving a user from the database."""
-        user = add_user(name="Jane Doe", email="jane@example.com")
+        with app.app_context():
+        
+            user = add_user(name="Jane Doe", email="jane@example.com")
 
-        user_from_db = db.session.get(User, user.id)
-        assert user_from_db is not None
-        assert user_from_db.name == "Jane Doe"
-        assert user_from_db.email == "jane@example.com"
+            user_from_db = db.session.get(User, user.id)
+            assert user_from_db is not None
+            assert user_from_db.name == "Jane Doe"
+            assert user_from_db.email == "jane@example.com"
 
-    def test_update_user(self, add_user):
+    def test_update_user(self, app, add_user):
         """Test updating an existing user in the database."""
-        user = add_user(name="Alice", email="alicetest@example.com")
+        with app.app_context():
+            user = add_user(name="Alice", email="alicetest@example.com")
 
-        # Update the user's name
-        user.name = "Alicia"
-        db.session.commit()
+            # Update the user's name
+            user.name = "Alicia"
+            db.session.commit()
 
-        # Retrieve the updated user
-        updated_user = db.session.get(User, user.id)
-        assert updated_user.name == "Alicia"
-        assert updated_user.email == "alicetest@example.com"
+            # Retrieve the updated user
+            updated_user = db.session.get(User, user.id)
+            assert updated_user.name == "Alicia"
+            assert updated_user.email == "alicetest@example.com"
 
     def test_delete_user(self, add_user):
         """Test deleting a user from the database."""
