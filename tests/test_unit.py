@@ -8,11 +8,11 @@ import re
 def test_create_user(add_user):
     """Test creating a user and saving to the database."""
     user = add_user(name="John Doe", email="john@example.com")
-    
+
     assert user.name == "John Doe"
     assert user.email == "john@example.com"
     assert user.id is not None
-    
+
     user_from_db = db.session.get(User, user.id)
     assert user_from_db is not None
     assert user_from_db.name == "John Doe"
@@ -22,7 +22,7 @@ def test_create_user(add_user):
 def test_read_user(add_user):
     """Test retrieving a user from the database."""
     user = add_user(name="Jane Doe", email="jane@example.com")
-    
+
     user_from_db = db.session.get(User, user.id)
     assert user_from_db is not None
     assert user_from_db.name == "Jane Doe"
@@ -32,11 +32,11 @@ def test_read_user(add_user):
 def test_update_user(add_user):
     """Test updating an existing user in the database."""
     user = add_user(name="Alice", email="alicetest@example.com")
-    
+
     # Update the user's name
     user.name = "Alicia"
     db.session.commit()
-    
+
     # Retrieve the updated user
     updated_user = db.session.get(User, user.id)
     assert updated_user.name == "Alicia"
@@ -46,15 +46,15 @@ def test_update_user(add_user):
 def test_delete_user(add_user):
     """Test deleting a user from the database."""
     user = add_user(name="Bob", email="bob@example.com")
-    
+
     # Ensure the user exists in the database before deletion
     user_from_db = db.session.get(User, user.id)
     assert user_from_db is not None
-    
+
     # Delete the user
     db.session.delete(user)
     db.session.commit()
-    
+
     # Ensure the user has been deleted
     deleted_user = db.session.get(User, user.id)
     assert deleted_user is None
@@ -63,11 +63,11 @@ def test_user_email_uniqueness(add_user):
     """Test that the email field is unique."""
     # Add a user with a specific email
     add_user(name="Charlie", email="charlie@example.com")
-    
+
     # Try to add another user with the same email and catch the exception
     with pytest.raises(IntegrityError):
         add_user(name="Dan", email="charlie@example.com")
-    
+
     # Verify that only one user with this email exists
     users_with_same_email = User.query.filter_by(email="charlie@example.com").all()
     assert len(users_with_same_email) == 1
@@ -98,13 +98,13 @@ def test_create_multiple_users(add_user):
     """Test creating multiple users and retrieving them."""
     user1 = add_user(name="User One", email="user1@example.com")
     user2 = add_user(name="User Two", email="user2@example.com")
-    
+
     assert user1.id is not None
     assert user2.id is not None
-    
+
     user_from_db1 = db.session.get(User, user1.id)
     user_from_db2 = db.session.get(User, user2.id)
-    
+
     assert user_from_db1.name == "User One"
     assert user_from_db1.email == "user1@example.com"
     assert user_from_db2.name == "User Two"
@@ -139,6 +139,7 @@ def test_get_users_empty(client):
     response = client.get('/users')
     assert response.status_code == 200
 
+
 def test_get_users_with_invalid_method(client):
     """Test using an invalid HTTP method."""
     response = client.put('/users', json={'name': 'Invalid', 'email': 'invalid@example.com'})
@@ -150,7 +151,6 @@ def test_create_user_invalid_payload(client):
     response = client.post('/users', json={'email': 'invalid@example.com'})  # Missing 'name'
     assert response.status_code == 500
     assert 'error' in response.json
-
 
 
 def test_create_user_no_payload(client):
