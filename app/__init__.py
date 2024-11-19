@@ -5,6 +5,7 @@ from flask_migrate import Migrate
 db = SQLAlchemy()
 migrate = Migrate()
 
+
 def create_app(testing=False):
     """Create a Flask application with optional testing configuration."""
     app = Flask(__name__)
@@ -18,7 +19,7 @@ def create_app(testing=False):
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['TESTING'] = testing
 
-    db.init_app(app)    
+    db.init_app(app)
     migrate.init_app(app, db)  # Initialize Flask-Migrate
 
     from .routes import main
