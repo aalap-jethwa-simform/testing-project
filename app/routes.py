@@ -137,3 +137,14 @@ def delete_project(project_id):
     db.session.delete(project)
     db.session.commit()
     return jsonify({'message': 'Project deleted'}), 200
+
+
+@main.route('v2/users', methods=['GET'])
+def get_users():
+    try:
+        users = User.query.all()
+        user_list = [{'id': user.id, 'name': user.name, 'email': user.email} for user in users]
+        return jsonify(user_list), 200
+    except Exception:
+        # Catch any exception and return a 500 error
+        return jsonify({'error': 'Internal Server Error'}), 500
